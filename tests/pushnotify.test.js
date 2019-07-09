@@ -1,6 +1,6 @@
 'use strict';
 
-require('should');
+var should = require('should');
 var levels = require('../lib/levels');
 
 describe('pushnotify', function ( ) {
@@ -16,22 +16,20 @@ describe('pushnotify', function ( ) {
       , message: 'details details details details'
       , level: levels.WARN
       , pushoverSound: 'climb'
-      , plugin: function test () {}
+      , plugin: {name: 'test'}
     };
 
     ctx.pushover = {
       PRIORITY_NORMAL: 0
       , PRIORITY_EMERGENCY: 2
-      , send: function mockedSend (msg, callback) {
-          msg.title.should.equal(notify.title);
-          msg.priority.should.equal(2);
-          msg.sound.should.equal('climb');
+      , send: function mockedSend (notify2, callback) {
+          should.deepEqual(notify, notify2);
           callback(null, JSON.stringify({receipt: 'abcd12345'}));
           done();
         }
     };
 
-    ctx.pushnotify = require('../lib/pushnotify')(env, ctx);
+    ctx.pushnotify = require('../lib/server/pushnotify')(env, ctx);
 
     ctx.pushnotify.emitNotification(notify);
 
@@ -50,22 +48,20 @@ describe('pushnotify', function ( ) {
       title: 'Sent from a test'
       , message: 'details details details details'
       , level: levels.INFO
-      , plugin: function test () {}
+      , plugin: {name: 'test'}
     };
 
     ctx.pushover = {
       PRIORITY_NORMAL: 0
       , PRIORITY_EMERGENCY: 2
-      , send: function mockedSend (msg, callback) {
-          msg.title.should.equal(notify.title);
-          msg.priority.should.equal(0);
-          msg.sound.should.equal('gamelan');
+      , send: function mockedSend (notify2, callback) {
+        should.deepEqual(notify, notify2);
           callback(null, JSON.stringify({}));
           done();
         }
     };
 
-    ctx.pushnotify = require('../lib/pushnotify')(env, ctx);
+    ctx.pushnotify = require('../lib/server/pushnotify')(env, ctx);
 
     ctx.pushnotify.emitNotification(notify);
 
@@ -85,16 +81,14 @@ describe('pushnotify', function ( ) {
       , message: 'details details details details'
       , level: levels.WARN
       , pushoverSound: 'climb'
-      , plugin: function test () {}
+      , plugin: {name: 'test'}
     };
 
     ctx.pushover = {
       PRIORITY_NORMAL: 0
       , PRIORITY_EMERGENCY: 2
-      , send: function mockedSend (msg, callback) {
-        msg.title.should.equal(notify.title);
-        msg.priority.should.equal(2);
-        msg.sound.should.equal('climb');
+      , send: function mockedSend (notify2, callback) {
+        should.deepEqual(notify, notify2);
         callback(null, JSON.stringify({receipt: 'abcd12345'}));
       }
       , cancelWithReceipt: function mockedCancel (receipt) {
@@ -103,7 +97,7 @@ describe('pushnotify', function ( ) {
       }
     };
 
-    ctx.pushnotify = require('../lib/pushnotify')(env, ctx);
+    ctx.pushnotify = require('../lib/server/pushnotify')(env, ctx);
 
     //first send the warning
     ctx.pushnotify.emitNotification(notify);
